@@ -9,8 +9,8 @@ Congratulations—you've landed a job with TEnmo, whose product is an online pay
 You should attempt to complete all of the following required use cases.
 
 1. **[COMPLETE]** As a user of the system, I need to be able to register myself with a username and password.
-   * A new registered user starts with an initial balance of 1,000 TE Bucks.
-   * The ability to register has been provided in your starter code.
+    * A new registered user starts with an initial balance of 1,000 TE Bucks.
+    * The ability to register has been provided in your starter code.
 2. **[COMPLETE]** As a user of the system, I need to be able to log in using my registered username and password.
    1. Logging in returns an Authentication Token. I need to include this token with all my subsequent interactions with the system outside of registering and logging in.
    2. The ability to log in has been provided in your starter code.
