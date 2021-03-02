@@ -14,24 +14,24 @@ You should attempt to complete all of the following required use cases.
 2. **[COMPLETE]** As a user of the system, I need to be able to log in using my registered username and password.
     * Logging in returns an Authentication Token. I need to include this token with all my subsequent interactions with the system outside of registering and logging in.
     * The ability to log in has been provided in your starter code.
-3. As an authenticated user of the system, I need to be able to see my Account Balance.
-4. As an authenticated user of the system, I need to be able to *send* a transfer of a specific amount of TE Bucks to a registered user.
+3. **MVP** As an authenticated user of the system, I need to be able to see my Account Balance.
+4. **MVP** As an authenticated user of the system, I need to be able to *send* a transfer of a specific amount of TE Bucks to a registered user.
     * I should be able to choose from a list of users to send TE Bucks to.
     * A transfer includes the User IDs of the from and to users and the amount of TE Bucks.
     * The receiver's account balance is increased by the amount of the transfer.
     * The sender's account balance is decreased by the amount of the transfer.
     * I can't send more TE Bucks than I have in my account.
     * A Sending Transfer has an initial status of "approve."
-5. As an authenticated user of the system, I need to be able to see transfers I have sent or received.
-6. As an authenticated user of the system, I need to be able to retrieve the details of any transfer based upon the transfer ID.
-7. **Non-MVP** As an authenticated user of the system, I need to be able to *request* a transfer of a specific amount of TE Bucks from another registered user.
+5. **MVP** As an authenticated user of the system, I need to be able to see transfers I have sent or received.
+6. **MVP** As an authenticated user of the system, I need to be able to retrieve the details of any transfer based upon the transfer ID.
+7. **Not-MVP** As an authenticated user of the system, I need to be able to *request* a transfer of a specific amount of TE Bucks from another registered user.
     * I should be able to choose from a list of users to request TE Bucks from.
     * A transfer includes the User IDs of the from and to users and the amount of TE Bucks.
     * A Request Transfer has an initial status of "pending."
     * No account balance changes until the request is approved.
     * The transfer request should appear in both users' list of transfers (use case #5).
-8. As an authenticated user of the system, I need to be able to see my "pending" transfers.
-9. As an authenticated user of the system, I need to be able to either approve or reject a Request Transfer.
+8. **Not-MVP** As an authenticated user of the system, I need to be able to see my "pending" transfers.
+9. **Not-MVP** As an authenticated user of the system, I need to be able to either approve or reject a Request Transfer.
     * I can't "approve" a given Request Transfer for more TE Bucks than I have in my account.
     * The Request Transfer status is "approved" if I approve, or "rejected" if I reject the request.
     * If the transfer is approved, the requester's account balance is increased by the amount of the request.
