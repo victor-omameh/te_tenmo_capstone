@@ -4,7 +4,7 @@ Congratulations—you've landed a job with TEnmo, whose product is an online pay
 
 ## Use cases
 
-### MVP Use Cases
+### Use Cases
 
 You should attempt to complete all of the following required use cases.
 
@@ -24,10 +24,7 @@ You should attempt to complete all of the following required use cases.
     * A Sending Transfer has an initial status of "approve."
 5. As an authenticated user of the system, I need to be able to see transfers I have sent or received.
 6. As an authenticated user of the system, I need to be able to retrieve the details of any transfer based upon the transfer ID.
-
-### Non-MVP Use Cases
-
-7. As an authenticated user of the system, I need to be able to *request* a transfer of a specific amount of TE Bucks from another registered user.
+7. **Non-MVP** As an authenticated user of the system, I need to be able to *request* a transfer of a specific amount of TE Bucks from another registered user.
     * I should be able to choose from a list of users to request TE Bucks from.
     * A transfer includes the User IDs of the from and to users and the amount of TE Bucks.
     * A Request Transfer has an initial status of "pending."
