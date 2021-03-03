@@ -73,4 +73,8 @@ public class ConsoleService {
 		} while(result == null);
 		return result;
 	}
+	
+	public void displayAccountBalance(double accountBalance) {
+		out.print("Your current account balance is: " + accountBalance);
+	}
 }
