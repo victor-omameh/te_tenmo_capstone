@@ -4,7 +4,10 @@ package com.techelevator.view;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Scanner;
+
+import com.techelevator.tenmo.models.AccountUser;
 
 public class ConsoleService {
 
@@ -75,6 +78,40 @@ public class ConsoleService {
 	}
 	
 	public void displayAccountBalance(double accountBalance) {
-		out.print("Your current account balance is: " + accountBalance);
+		out.println("Your current account balance is: " + accountBalance);
+	}
+	
+	public void displayListOfUsers(List<AccountUser> users) {
+		String lineFormat = "%-10s %-50s %n";
+		out.println("--------------------------");
+		out.println("Users");
+		out.printf(lineFormat,"ID","Name");
+		out.println("--------------------------");
+		
+		for(AccountUser user : users) {
+			out.printf(lineFormat,user.getUserId(),user.getUsername() );
+			
+		} out.println("----------");
+	}
+	
+	public double getAmountToTransfer() {
+		double amount = 0.0;
+		while(true) {
+			out.print("Enter amount: ");
+			out.flush();
+			String userInput = in.nextLine();
+			try {
+				amount = Double.parseDouble(userInput);
+				break;
+			} catch(NumberFormatException e) {
+				out.println(System.lineSeparator() + "*** " + userInput + " is not valid ***" + System.lineSeparator());
+			}
+			
+		}
+		return amount;
+	} 
+	
+	public void errorPrompt(String prompt) {
+		out.println(prompt);
 	}
 }

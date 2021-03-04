@@ -1,5 +1,9 @@
 package com.techelevator.tenmo;
 
+import java.text.DecimalFormat;
+import java.util.List;
+
+import com.techelevator.tenmo.models.AccountUser;
 import com.techelevator.tenmo.models.AuthenticatedUser;
 import com.techelevator.tenmo.models.UserCredentials;
 import com.techelevator.tenmo.services.AccountUserService;
@@ -26,8 +30,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     private AuthenticatedUser currentUser;
     private ConsoleService console;
     private AuthenticationService authenticationService;
-    
     private AccountUserService accountUserService;
+    DecimalFormat df = new DecimalFormat("#,###.##");
 
     public static void main(String[] args) {
     	App app = new App(new ConsoleService(System.in, System.out), new AuthenticationService(API_BASE_URL));
@@ -54,14 +58,13 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			String choice = (String)console.getChoiceFromOptions(MAIN_MENU_OPTIONS);
 			if(MAIN_MENU_OPTION_VIEW_BALANCE.equals(choice)) {
 				double accountBalance = accountUserService.getAccountBalance();
-				System.out.println(accountBalance);
 				console.displayAccountBalance(accountBalance);
 			} else if(MAIN_MENU_OPTION_VIEW_PAST_TRANSFERS.equals(choice)) {
 				// View Transfer History
 			} else if(MAIN_MENU_OPTION_VIEW_PENDING_REQUESTS.equals(choice)) {
 				// View Pending Requests
 			} else if(MAIN_MENU_OPTION_SEND_BUCKS.equals(choice)) {
-				// Send Bucks
+				requestingTransfer(accountUserService.getListOfUsers());
 			} else if(MAIN_MENU_OPTION_REQUEST_BUCKS.equals(choice)) {
 				// Request Bucks
 			} else if(MAIN_MENU_OPTION_LOGIN.equals(choice)) {
@@ -73,6 +76,22 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		}
 	}
 
+	//SET RETURN TYPE TO TRANSFER OBJECT
+	//SET TRANSFER OBJECT EQUAL TO USER INPUT SELECTION
+	//Handle 0 input to cancel
+	//Consider creating more private methods
+	private void requestingTransfer (List<AccountUser> users ) {
+		
+		console.displayListOfUsers(accountUserService.getListOfUsers());
+		int receivingUser = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel): ");
+		double amountToTransfer = console.getAmountToTransfer();
+		
+		if(accountUserService.getAccountBalance() < amountToTransfer) {
+			console.errorPrompt("**Insufficient Funds** current balance is " + accountUserService.getAccountBalance());
+		}
+		
+	}
+	
 	
 	private void exitProgram() {
 		System.exit(0);

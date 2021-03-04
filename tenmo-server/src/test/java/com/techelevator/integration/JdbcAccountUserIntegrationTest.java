@@ -1,6 +1,7 @@
 package com.techelevator.integration;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import org.junit.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,6 +10,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 import com.techelevator.tenmo.accounts.dao.AccountUserDao;
 import com.techelevator.tenmo.accounts.dao.JdbcAccountUserDao;
+import com.techelevator.tenmo.accounts.model.AccountUser;
 
 
 public class JdbcAccountUserIntegrationTest {
@@ -52,6 +54,22 @@ public class JdbcAccountUserIntegrationTest {
 		
 		Assert.assertEquals(1000.00, result, 0.0);
 		
+	}
+	
+	@Test
+	public void getListOfUsers() {
+		createTestUser("testname1");
+		createTestUser("testname2");
+		
+		List<AccountUser> result = dao.getListOfUsers("testname1");
+		AccountUser testResultUser = new AccountUser();
+		for(AccountUser user: result) {
+			if(user.getUsername().equals("testname2")) {
+				testResultUser = user;
+			}
+		}
+		
+		Assert.assertEquals("testname2", testResultUser.getUsername());
 	}
 	
 	
