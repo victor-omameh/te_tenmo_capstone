@@ -113,4 +113,19 @@ public class ConsoleService {
 	public void errorPrompt(String prompt) {
 		out.println(prompt);
 	}
+	
+	public boolean validatingUserIdInput(List<AccountUser> userList, int userSelection) {
+		
+		boolean selectionValid = false;
+		for (AccountUser users : userList) {
+			if (users.getUserId() == userSelection) {
+				selectionValid = true;
+				break;
+			}
+		}
+		
+		return selectionValid;
+		
+	}
+	
 }

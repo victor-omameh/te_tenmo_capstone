@@ -5,10 +5,12 @@ import java.util.List;
 
 import com.techelevator.tenmo.models.AccountUser;
 import com.techelevator.tenmo.models.AuthenticatedUser;
+import com.techelevator.tenmo.models.Transfer;
 import com.techelevator.tenmo.models.UserCredentials;
 import com.techelevator.tenmo.services.AccountUserService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
+import com.techelevator.tenmo.services.TransferService;
 import com.techelevator.view.ConsoleService;
 
 public class App {
@@ -31,6 +33,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     private ConsoleService console;
     private AuthenticationService authenticationService;
     private AccountUserService accountUserService;
+    private TransferService transferService;
     DecimalFormat df = new DecimalFormat("#,###.##");
 
     public static void main(String[] args) {
@@ -50,6 +53,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		
 		registerAndLogin();
 		accountUserService = new AccountUserService(API_BASE_URL, currentUser);
+		transferService = new TransferService(API_BASE_URL, currentUser);
 		mainMenu();
 	}
 
@@ -76,21 +80,42 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		}
 	}
 
-	//SET RETURN TYPE TO TRANSFER OBJECT
-	//SET TRANSFER OBJECT EQUAL TO USER INPUT SELECTION
-	//Handle 0 input to cancel
-	//Consider creating more private methods
+	
 	private void requestingTransfer (List<AccountUser> users ) {
-		
-		console.displayListOfUsers(accountUserService.getListOfUsers());
-		int receivingUser = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel): ");
-		if(receivingUser == 0) {
-			return;
-		}
-		double amountToTransfer = console.getAmountToTransfer();
-		
-		if(accountUserService.getAccountBalance() < amountToTransfer) {
-			console.errorPrompt("**Insufficient Funds** current balance is " + accountUserService.getAccountBalance());
+		Transfer sendTransfer = new Transfer();
+		int receivingUser = 0;
+		double amountToTransfer = 0;
+		while(true) {
+			
+			while (true) {
+				console.displayListOfUsers(accountUserService.getListOfUsers());
+				receivingUser = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel)");
+				if(receivingUser == 0) {
+					return;
+				}
+				if (!(console.validatingUserIdInput(accountUserService.getListOfUsers(), receivingUser))) {
+					console.errorPrompt("*** Invalid User *** Please select user ID from list");
+				} else {
+					break;
+				}
+			}
+			
+			amountToTransfer = console.getAmountToTransfer();
+			
+			if((accountUserService.getAccountBalance() < amountToTransfer)) {
+				console.errorPrompt("*** Insufficient Funds *** current balance is " + accountUserService.getAccountBalance());
+			} else if (amountToTransfer <= 0){
+				console.errorPrompt("*** Invalid Amount ***");	
+			} else {
+				sendTransfer.setUserToId(receivingUser);
+				sendTransfer.setUsernameFrom(currentUser.getUser().getUsername());
+				sendTransfer.setTransferAmount(amountToTransfer);
+				
+				transferService.intiatingSendingTransfer(sendTransfer);
+				console.errorPrompt("Transfer Request Complete [Status Pending] Transfer Amount: " + amountToTransfer);
+				break;
+			}
+
 		}
 		
 	}

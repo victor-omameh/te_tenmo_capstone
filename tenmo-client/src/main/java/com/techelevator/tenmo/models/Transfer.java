@@ -1,7 +1,7 @@
-package com.techelevator.tenmo.accounts.model;
+package com.techelevator.tenmo.models;
 
 public class Transfer {
-	
+
 	private int transferId;
 	private int accountFromId;
 	private int accountToId;
@@ -90,7 +90,4 @@ public class Transfer {
 	}
 	
 	
-	
-	
-
 }
