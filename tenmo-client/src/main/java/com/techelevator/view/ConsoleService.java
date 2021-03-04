@@ -106,7 +106,6 @@ public class ConsoleService {
 			} catch(NumberFormatException e) {
 				out.println(System.lineSeparator() + "*** " + userInput + " is not valid ***" + System.lineSeparator());
 			}
-			
 		}
 		return amount;
 	} 

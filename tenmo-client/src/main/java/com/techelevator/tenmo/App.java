@@ -84,6 +84,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		
 		console.displayListOfUsers(accountUserService.getListOfUsers());
 		int receivingUser = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel): ");
+		if(receivingUser == 0) {
+			return;
+		}
 		double amountToTransfer = console.getAmountToTransfer();
 		
 		if(accountUserService.getAccountBalance() < amountToTransfer) {

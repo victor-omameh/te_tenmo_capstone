@@ -22,7 +22,6 @@ public class JdbcAccountUserDao implements AccountUserDao{
 	
 	@Override
 	public double getAccountBalance(String username) {
-		   DecimalFormat df = new DecimalFormat("#,###.##");
 		
 		String sql = "SELECT balance FROM accounts " + 
 				"JOIN users on users.user_id = accounts.user_id " + 
