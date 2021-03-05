@@ -27,10 +27,13 @@ public class AccountUserController {
 	
 
 	
-	@RequestMapping(path = "/users/accounts", method = RequestMethod.GET)
-	public double getAccountBalance(Principal principal) {
+	@RequestMapping(path = "/users/{username}/accounts", method = RequestMethod.GET)
+	public double getAccountBalance(Principal principal, @PathVariable String username) {
 		
-		return dao.getAccountBalance(principal.getName());
+		if (principal.getName().equals(username)) {
+			return dao.getAccountBalance(principal.getName());
+		}
+		return 0.0;
 	}
 	
 	@RequestMapping(path = "/users", method = RequestMethod.GET)

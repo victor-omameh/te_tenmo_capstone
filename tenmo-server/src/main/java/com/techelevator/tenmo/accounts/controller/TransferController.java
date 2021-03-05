@@ -38,4 +38,13 @@ public class TransferController {
 	public List<Transfer> getListOfTransfers (Principal principal){
 		return dao.getListOfTransfers(principal.getName());
 	}
+	
+	
+	@RequestMapping (path = "/transfers", method = RequestMethod.PUT)
+	public void updateTransferStatus (@RequestBody Transfer transferRequest, Principal principal) {
+		
+		if (principal.getName().equals(transferRequest.getUsernameFrom())) {
+			dao.approveOrRejectTransferRequest(transferRequest);
+		}
+	}
 }

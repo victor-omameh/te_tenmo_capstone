@@ -4,7 +4,7 @@ public class AccountUser {
 
 	private int accountId;
 	private int userId;
-	private double accountBalance = 1000;
+	private double accountBalance;
 	private String username;
 	
 	

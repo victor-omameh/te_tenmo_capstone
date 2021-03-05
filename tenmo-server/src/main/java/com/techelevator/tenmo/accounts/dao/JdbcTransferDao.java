@@ -184,6 +184,16 @@ public class JdbcTransferDao implements TransferDao{
 	}
 	
 	
+	@Override
+	public int approveOrRejectTransferRequest(Transfer transfer) {
+		
+		String sql = "UPDATE transfers SET transfer_status_id = ? WHERE transfer_id = ? RETURNING transfer_status_id";
+		 int updatedStatusId = jdbcTemplate.queryForObject(sql, int.class, transfer.getTransferStatusId(), transfer.getTransferId());
+		
+		return updatedStatusId;
+	}
+	
+	
 	private Transfer mapTransferDetailsToTransfer(SqlRowSet row) {
 		Transfer transfer = new Transfer();
 		
@@ -199,6 +209,7 @@ public class JdbcTransferDao implements TransferDao{
 		return transfer;
 		
 	}
-	
+
+
 	
 }

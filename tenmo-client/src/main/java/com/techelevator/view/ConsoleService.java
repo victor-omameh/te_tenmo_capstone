@@ -4,6 +4,7 @@ package com.techelevator.view;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Scanner;
 
@@ -14,6 +15,7 @@ public class ConsoleService {
 
 	private PrintWriter out;
 	private Scanner in;
+	private static DecimalFormat df2 = new DecimalFormat("#,##0.00");
 
 	public ConsoleService(InputStream input, OutputStream output) {
 		this.out = new PrintWriter(output, true);
@@ -79,7 +81,7 @@ public class ConsoleService {
 	}
 	
 	public void displayAccountBalance(double accountBalance) {
-		out.println("Your current account balance is: " + accountBalance);
+		out.println("Your current account balance is: $" + df2.format(accountBalance));
 	}
 	
 	public void displayListOfUsers(List<AccountUser> users) {
@@ -143,7 +145,7 @@ public class ConsoleService {
 	}
 	
 	
-	public void viewTransfers(List<Transfer> transfers, String username) {
+	public void viewTransfers(List<Transfer> transfers, String currentUser) {
 		String lineFormat = "%-10s %-15s %-15s %n";
 		out.println("-----------------------------------------");
 		out.println("Transfers");
@@ -157,14 +159,14 @@ public class ConsoleService {
 			String userNameFrom = transfer.getUsernameFrom();
 			String userNameTo = transfer.getUsernameTo();	
 			
-			if(transfer.getTransferType().equals("Send")) {
-				if(transfer.getUsernameTo().equals(username)) {
+			if(!(transfer.getTransferStatusId() == 1)) {
+				if(transfer.getUsernameTo().equals(currentUser)) {
 					user = "From: " + transfer.getUsernameFrom();
-				} else if(!(transfer.getUsernameTo().equals(username))) {
+				} else if(!(transfer.getUsernameTo().equals(currentUser))) {
 					user = "To: " + transfer.getUsernameTo();
 				}
+				out.printf(lineFormat, transfer.getTransferId(), user, "$"+ df2.format(transfer.getTransferAmount()));
 			}
-			out.printf(lineFormat, transfer.getTransferId(), user, transfer.getTransferAmount());
 		}
 		out.println("----------");
 		
@@ -179,7 +181,57 @@ public class ConsoleService {
 		out.println("To: " + selectedTransfer.getUsernameTo());
 		out.println("Type: " + selectedTransfer.getTransferType());
 		out.println("Status: " + selectedTransfer.getTransferStatus());
-		out.println("Amount: $" + selectedTransfer.getTransferAmount());
+		out.println("Amount: $" + df2.format(selectedTransfer.getTransferAmount()));
 		
 	}
+	
+	public void viewPendingRequests(List<Transfer> transfers, String currentUser) {
+		
+		String lineFormat = "%-10s %-15s %-15s %n";
+		out.println("-----------------------------------------");
+		out.println("Pending Transfers");
+		out.printf(lineFormat,"ID","To", "Amount");
+		out.println("-----------------------------------------");
+		
+		//String user = "";
+		
+		for(Transfer transfer : transfers) {
+			
+			
+			//String userNameTo = transfer.getUsernameTo();	
+			
+			if((transfer.getTransferStatusId() == 1)) {
+				if(!(transfer.getUsernameTo().equals(currentUser))) {
+					out.printf(lineFormat, transfer.getTransferId(), transfer.getUsernameTo(), "$"+ df2.format(transfer.getTransferAmount()));
+				} 
+			}
+		}
+		out.println("----------");
+	
+	}
+	
+	public boolean validatingPendingTransferSelection (List<Transfer> listOfTransfers, int userSelection, int currentUserId) {
+		boolean validSelection = false;
+		
+		for ( Transfer transfer: listOfTransfers) {
+			if (transfer.getTransferStatusId() == 1) {
+				if (transfer.getUserFromId() == currentUserId) {
+					if (transfer.getTransferId() == userSelection) {
+						validSelection = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		return validSelection;
+	}
+	
+	public void approveOrRejectRequest() {
+		out.println("1: Approve");
+		out.println("2: Reject");
+		out.println("0: Don't approve or reject");
+		out.println("----------");
+	}
+	
 }

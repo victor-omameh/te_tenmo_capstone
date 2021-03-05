@@ -100,6 +100,32 @@ public class JdbcTransferIntegrationTest {
 		
 	}
 	
+	@Test
+	public void updating_request_status_to_approved() {
+		createTestUser("testToUser");
+		int userID = createTestUser("testFromUser");
+		Transfer test = dao.intiatingRequestTransfer(userID, "testToUser", 50);
+		test.setTransferStatusId(2);
+		
+		int result = dao.approveOrRejectTransferRequest(test);
+		
+		Assert.assertEquals(2, result);
+		
+	}
+	
+	
+	@Test
+	public void updating_request_status_to_rejected() {
+		createTestUser("testToUser");
+		int userID = createTestUser("testFromUser");
+		Transfer test = dao.intiatingRequestTransfer(userID, "testToUser", 50);
+		test.setTransferStatusId(3);
+		
+		int result = dao.approveOrRejectTransferRequest(test);
+		
+		Assert.assertEquals(3, result);
+	}
+	
 	
 	
 	private int createTestUser(String testName) {
@@ -120,6 +146,8 @@ public class JdbcTransferIntegrationTest {
 		jdbcTemplate.queryForRowSet(sql, userId);
 		
 	}
+	
+	
 	
 	
 }

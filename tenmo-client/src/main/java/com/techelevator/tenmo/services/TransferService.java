@@ -53,4 +53,17 @@ public class TransferService {
 		
 		return restTemplate.exchange(baseUrl + "transfers", HttpMethod.POST, entity, Transfer.class).getBody();
 	}
+	
+	public void updateTransferRequestStatus(Transfer transfer) {
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBearerAuth(user.getToken());
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<Transfer> entity = new HttpEntity<Transfer>(transfer, headers);
+		
+		restTemplate.exchange(baseUrl + "transfers", HttpMethod.PUT, entity, Transfer.class).getBody();
+		
+	}
+	
+	
 }

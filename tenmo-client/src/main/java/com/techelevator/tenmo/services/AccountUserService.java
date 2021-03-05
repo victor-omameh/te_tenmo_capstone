@@ -23,12 +23,12 @@ public class AccountUserService {
 		this.user  = user;
 	}
 	
-	public double getAccountBalance() {
+	public double getAccountBalance(String username) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setBearerAuth(user.getToken());
 		HttpEntity<Double> entity = new HttpEntity(headers);
 		
-		double accountBalance = restTemplate.exchange(baseUrl + "users/accounts", HttpMethod.GET, entity, double.class).getBody();
+		double accountBalance = restTemplate.exchange(baseUrl + "users/"+ username + "/accounts", HttpMethod.GET, entity, double.class).getBody();
 		return accountBalance;
 	}
 	

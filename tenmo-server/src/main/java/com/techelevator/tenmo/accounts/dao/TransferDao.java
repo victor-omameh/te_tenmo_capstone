@@ -12,5 +12,7 @@ public interface TransferDao {
 	
 	public List<Transfer> getListOfTransfers(String username);
 	
+	public int approveOrRejectTransferRequest(Transfer transfer);
+	
 	
 }
