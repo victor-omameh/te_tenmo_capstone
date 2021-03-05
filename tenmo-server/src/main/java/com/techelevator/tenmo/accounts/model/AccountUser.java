@@ -4,7 +4,7 @@ public class AccountUser {
 
 	private int accountId;
 	private int userId;
-	private double accountBalance;
+	private double accountBalance = 1000;
 	private String username;
 	
 	
@@ -33,6 +33,13 @@ public class AccountUser {
 		this.username = username;
 	}
 	
+	public double addAccountBalance(double transferAmount) {
+		return this.accountBalance = accountBalance + transferAmount;
+	}
+	
+	public double subtractAccountBalance(double transferAmount) {
+		return this.accountBalance = accountBalance - transferAmount;
+	}
 	
 	
 }

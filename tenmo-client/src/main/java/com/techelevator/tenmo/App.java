@@ -1,6 +1,7 @@
 package com.techelevator.tenmo;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.techelevator.tenmo.models.AccountUser;
@@ -34,6 +35,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     private AuthenticationService authenticationService;
     private AccountUserService accountUserService;
     private TransferService transferService;
+    private Transfer transfer;
+    
     DecimalFormat df = new DecimalFormat("#,###.##");
 
     public static void main(String[] args) {
@@ -54,9 +57,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		registerAndLogin();
 		accountUserService = new AccountUserService(API_BASE_URL, currentUser);
 		transferService = new TransferService(API_BASE_URL, currentUser);
+		transfer = new Transfer();
 		mainMenu();
 	}
 
+	
 	private void mainMenu() {
 		while(true) {
 			String choice = (String)console.getChoiceFromOptions(MAIN_MENU_OPTIONS);
@@ -64,13 +69,13 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				double accountBalance = accountUserService.getAccountBalance();
 				console.displayAccountBalance(accountBalance);
 			} else if(MAIN_MENU_OPTION_VIEW_PAST_TRANSFERS.equals(choice)) {
-				// View Transfer History
+				viewTransferDetails();
 			} else if(MAIN_MENU_OPTION_VIEW_PENDING_REQUESTS.equals(choice)) {
-				// View Pending Requests
+				
 			} else if(MAIN_MENU_OPTION_SEND_BUCKS.equals(choice)) {
-				requestingTransfer(accountUserService.getListOfUsers());
+				initiateSendTransfer(filterListOfUsers());
 			} else if(MAIN_MENU_OPTION_REQUEST_BUCKS.equals(choice)) {
-				// Request Bucks
+				initiateRequestTransfer(filterListOfUsers());
 			} else if(MAIN_MENU_OPTION_LOGIN.equals(choice)) {
 				login();
 			} else {
@@ -79,22 +84,51 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			}
 		}
 	}
+	
+	private List<AccountUser> filterListOfUsers() {
+		
+		List<AccountUser> filteredListOfUsers = new ArrayList<AccountUser>();
+		List<AccountUser> listOfUsers = accountUserService.getListOfAllUsers();
+		
+		for(AccountUser accountUser : listOfUsers) {
+			if(!(accountUser.getUserId() == currentUser.getUser().getId())) {
+				filteredListOfUsers.add(accountUser);
+			}
+		}
+		return filteredListOfUsers;
+	}
+	
+	private AccountUser mappingUser (int userId) {
+		AccountUser selectedUser = new AccountUser();
+		List<AccountUser> users = accountUserService.getListOfAllUsers();
+		
+		for(AccountUser user : users) {
+			if(user.getUserId() == userId) {
+				selectedUser = user; 
+				break;
+			}
+		}	
+		return selectedUser;
+	}
 
 	
-	private void requestingTransfer (List<AccountUser> users ) {
+	private void initiateSendTransfer (List<AccountUser> users ) {
 		Transfer sendTransfer = new Transfer();
 		int receivingUser = 0;
 		double amountToTransfer = 0;
+		AccountUser loggedInUser = new AccountUser();
+		AccountUser receipient = new AccountUser();
+		
 		while(true) {
 			
 			while (true) {
-				console.displayListOfUsers(accountUserService.getListOfUsers());
+				console.displayListOfUsers(filterListOfUsers());
 				receivingUser = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel)");
 				if(receivingUser == 0) {
 					return;
 				}
-				if (!(console.validatingUserIdInput(accountUserService.getListOfUsers(), receivingUser))) {
-					console.errorPrompt("*** Invalid User *** Please select user ID from list");
+				if (!(console.validatingUserIdInput(filterListOfUsers(), receivingUser))) {
+					console.prompt("*** Invalid User *** Please select user ID from list");
 				} else {
 					break;
 				}
@@ -103,21 +137,88 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			amountToTransfer = console.getAmountToTransfer();
 			
 			if((accountUserService.getAccountBalance() < amountToTransfer)) {
-				console.errorPrompt("*** Insufficient Funds *** current balance is " + accountUserService.getAccountBalance());
+				console.prompt("*** Insufficient Funds *** current balance is " + accountUserService.getAccountBalance());
 			} else if (amountToTransfer <= 0){
-				console.errorPrompt("*** Invalid Amount ***");	
+				console.prompt("*** Invalid Amount ***");	
 			} else {
 				sendTransfer.setUserToId(receivingUser);
 				sendTransfer.setUsernameFrom(currentUser.getUser().getUsername());
 				sendTransfer.setTransferAmount(amountToTransfer);
+				sendTransfer.setTransferTypeId(2);
+			
+				loggedInUser = mappingUser(currentUser.getUser().getId());
+				loggedInUser.subtractAccountBalance(amountToTransfer);
+				
+				receipient = mappingUser(receivingUser);
+				receipient.addAccountBalance(amountToTransfer);
+				
+				accountUserService.updateAccountBalance(loggedInUser);
+				accountUserService.updateAccountBalance(receipient);
 				
 				transferService.intiatingSendingTransfer(sendTransfer);
-				console.errorPrompt("Transfer Request Complete [Status Pending] Transfer Amount: " + amountToTransfer);
+				console.prompt("Transfer Complete [Status Approved] Transfer Amount: " + amountToTransfer);
+				console.prompt("Your current balance is: " + accountUserService.getAccountBalance());
 				break;
 			}
 
 		}
 		
+	}
+	
+	private void initiateRequestTransfer(List<AccountUser> users) {
+		Transfer requestTransfer = new Transfer();
+		int userSelection = 0;
+		double amountToTransfer = 0;
+		
+		while(true) {
+			while (true) {
+				console.displayListOfUsers(filterListOfUsers());
+				userSelection = console.getUserInputInteger("Enter ID of user you are requesting from (0 to cancel)");
+				if(userSelection == 0) {
+					return;
+				}
+				if (!(console.validatingUserIdInput(filterListOfUsers(), userSelection))) {
+					console.prompt("*** Invalid User *** Please select user ID from list");
+				} else {
+					break;
+				}
+			}
+			amountToTransfer = console.getAmountToTransfer();
+			
+			if(amountToTransfer <= 0) {
+				console.prompt("*** Invalid Amount ***");	
+			} else {
+				requestTransfer.setUserFromId(userSelection);
+				requestTransfer.setUsernameTo(currentUser.getUser().getUsername());
+				requestTransfer.setTransferAmount(amountToTransfer);
+				requestTransfer.setTransferTypeId(1);
+				
+				transferService.intiatingRequestingTransfer(requestTransfer);
+				console.prompt("Transfer Request Complete [Status Pending] Transfer Amount: " + amountToTransfer);
+				break;
+			}
+		}
+		
+	}
+	
+	
+	private void viewTransferDetails () {
+		int userSelection = 0;
+		
+		while(true) {
+			console.viewTransfers(transferService.getListOfTransfers(), currentUser.getUser().getUsername());
+			userSelection = console.getUserInputInteger("Please enter transfer ID to view details (0 to cancel)");
+			if(userSelection == 0) {
+				return;
+			}
+			if(!(console.validatingTransferIdInput(transferService.getListOfTransfers(), userSelection))) {
+				console.prompt("*** Invalid Transfer ID *** Please select Transfer ID from list");
+			} else {
+				break;	
+			}
+			;
+		}
+		console.viewTransferDetails(transfer.matchTransferObjectFromList(transferService.getListOfTransfers(), userSelection));
 	}
 	
 	

@@ -88,6 +88,18 @@ public class JdbcTransferIntegrationTest {
 		
 	}
 	
+	@Test
+	public void correctUserDetailsRequestTransfer() {
+		
+		createTestUser("testToUser");
+		int userID = createTestUser("testFromUser");
+		
+		Transfer result = dao.intiatingRequestTransfer(userID, "testToUser", 50);
+		
+		Assert.assertEquals(userID, result.getUserFromId());
+		
+	}
+	
 	
 	
 	private int createTestUser(String testName) {

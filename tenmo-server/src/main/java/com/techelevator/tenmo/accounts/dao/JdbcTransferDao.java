@@ -17,6 +17,7 @@ public class JdbcTransferDao implements TransferDao{
 		this.jdbcTemplate = jdbcTemplate;
 	}
 	
+	
 	@Override
 	public Transfer intiatingSendTransfer(int userIdTo, String username, double amountToTransfer) {
 		
@@ -32,7 +33,7 @@ public class JdbcTransferDao implements TransferDao{
 		int accountIdTo = jdbcTemplate.queryForObject(getAccountIdTo, int.class, userIdTo);
 		
 		//inserting transfer into database
-		String insertTransfer = "INSERT INTO transfers (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (DEFAULT, 2, 1, ?, ?, ?) RETURNING transfer_id";
+		String insertTransfer = "INSERT INTO transfers (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (DEFAULT, 2, 2, ?, ?, ?) RETURNING transfer_id";
 		int transferID = jdbcTemplate.queryForObject(insertTransfer, int.class, accountIdFrom, accountIdTo, amountToTransfer);
 		
 		//pull first transfer details to create object
@@ -76,9 +77,58 @@ public class JdbcTransferDao implements TransferDao{
 	
 	
 	@Override
-	public Transfer intiatingRequestTransfer(int userFrom, String username, double amountToTransfer) {
-		// TODO Auto-generated method stub
-		return null;
+	public Transfer intiatingRequestTransfer(int userIdFrom, String username, double amountToTransfer) {
+		
+				String getUserID = "SELECT user_id FROM users WHERE username = ?";
+				int userToId = jdbcTemplate.queryForObject(getUserID, int.class, username);
+				
+			
+				String getAccountIdTo = "SELECT account_id FROM accounts WHERE user_id = ?";
+				int accountIdTo = jdbcTemplate.queryForObject(getAccountIdTo, int.class, userToId);
+				
+				String getAccountIdFrom = "SELECT account_id FROM accounts WHERE user_id = ?";
+				int accountIdFrom = jdbcTemplate.queryForObject(getAccountIdFrom, int.class, userIdFrom);
+				
+				
+				String insertTransfer = "INSERT INTO transfers (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (DEFAULT, 1, 1, ?, ?, ?) RETURNING transfer_id";
+				int transferID = jdbcTemplate.queryForObject(insertTransfer, int.class, accountIdFrom, accountIdTo, amountToTransfer);
+				
+				
+				String sql = "SELECT transfer_id, transfers.transfer_type_id, transfer_type_desc, transfers.transfer_status_id, transfer_status_desc, account_from, account_to, amount " + 
+						"FROM transfers " + 
+						"JOIN transfer_types tt ON tt.transfer_type_id = transfers.transfer_type_id " + 
+						"JOIN transfer_statuses ts ON ts.transfer_status_id = transfers.transfer_status_id " + 
+						"WHERE transfer_id = ?";
+				SqlRowSet row = jdbcTemplate.queryForRowSet(sql, transferID);
+				
+				Transfer intiatingRequestTransfer = new Transfer();
+				
+			
+				row.next();
+				intiatingRequestTransfer = mapTransferDetailsToTransfer(row);
+				
+				
+			
+				String gettingAccountFromDetails = "SELECT account_id, accounts.user_id, username, balance FROM accounts " + 
+						"JOIN users on users.user_id = accounts.user_id " + 
+						"WHERE account_id = ?";
+				SqlRowSet accountFromRow = jdbcTemplate.queryForRowSet(gettingAccountFromDetails, accountIdFrom);
+				accountFromRow.next();
+				intiatingRequestTransfer.setUserFromId(accountFromRow.getInt("user_id"));
+				intiatingRequestTransfer.setUsernameFrom(accountFromRow.getString("username"));
+				
+				
+				String gettingAccountToDetails = "SELECT account_id, accounts.user_id, username, balance FROM accounts " + 
+						"JOIN users on users.user_id = accounts.user_id " + 
+						"WHERE account_id = ?";
+				SqlRowSet accountToRow = jdbcTemplate.queryForRowSet(gettingAccountToDetails, accountIdTo);
+				accountToRow.next();
+				intiatingRequestTransfer.setUserToId(accountToRow.getInt("user_id"));
+				intiatingRequestTransfer.setUsernameTo(accountToRow.getString("username"));
+				
+				
+				
+				return intiatingRequestTransfer;
 	}
 	
 	

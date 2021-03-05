@@ -12,4 +12,5 @@ public interface TransferDao {
 	
 	public List<Transfer> getListOfTransfers(String username);
 	
+	
 }

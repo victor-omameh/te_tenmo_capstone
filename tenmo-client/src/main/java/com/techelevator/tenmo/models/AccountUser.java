@@ -31,5 +31,11 @@ public class AccountUser {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+	public double addAccountBalance(double transferAmount) {
+		return this.accountBalance = accountBalance + transferAmount;
+	}
 	
+	public double subtractAccountBalance(double transferAmount) {
+		return this.accountBalance = accountBalance - transferAmount;
+	}
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.techelevator.tenmo.models.AccountUser;
+import com.techelevator.tenmo.models.Transfer;
 
 public class ConsoleService {
 
@@ -110,7 +111,7 @@ public class ConsoleService {
 		return amount;
 	} 
 	
-	public void errorPrompt(String prompt) {
+	public void prompt(String prompt) {
 		out.println(prompt);
 	}
 	
@@ -127,5 +128,58 @@ public class ConsoleService {
 		return selectionValid;
 		
 	}
+	public boolean validatingTransferIdInput(List<Transfer> transferList, int userSelection) {
+		
+		boolean selectionValid = false;
+		for ( Transfer transfer: transferList) {
+			if (transfer.getTransferId() == userSelection) {
+				selectionValid = true;
+				break;
+			}
+		}
+		
+		return selectionValid;
+		
+	}
 	
+	
+	public void viewTransfers(List<Transfer> transfers, String username) {
+		String lineFormat = "%-10s %-15s %-15s %n";
+		out.println("-----------------------------------------");
+		out.println("Transfers");
+		out.printf(lineFormat,"ID","From/To", "Amount");
+		out.println("-----------------------------------------");
+		
+		String user = "";
+		
+		for(Transfer transfer : transfers) {
+			
+			String userNameFrom = transfer.getUsernameFrom();
+			String userNameTo = transfer.getUsernameTo();	
+			
+			if(transfer.getTransferType().equals("Send")) {
+				if(transfer.getUsernameTo().equals(username)) {
+					user = "From: " + transfer.getUsernameFrom();
+				} else if(!(transfer.getUsernameTo().equals(username))) {
+					user = "To: " + transfer.getUsernameTo();
+				}
+			}
+			out.printf(lineFormat, transfer.getTransferId(), user, transfer.getTransferAmount());
+		}
+		out.println("----------");
+		
+	}
+	
+	public void viewTransferDetails(Transfer selectedTransfer) {
+		out.println("-----------------------------------------");
+		out.println("Transfers Details");
+		out.println("-----------------------------------------");
+		out.println("ID: " + selectedTransfer.getTransferId());
+		out.println("From: " + selectedTransfer.getUsernameFrom());
+		out.println("To: " + selectedTransfer.getUsernameTo());
+		out.println("Type: " + selectedTransfer.getTransferType());
+		out.println("Status: " + selectedTransfer.getTransferStatus());
+		out.println("Amount: $" + selectedTransfer.getTransferAmount());
+		
+	}
 }

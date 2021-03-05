@@ -9,5 +9,11 @@ public interface AccountUserDao {
 	public double getAccountBalance(String username);
 	
 	public List<AccountUser> getListOfUsers(String username);
+	
+	public List<AccountUser> getListOfAllUsers();
+	
+	public AccountUser updateAccountBalance (AccountUser accountUser);
+	
+	//public AccountUser addMoney(AccountUser accountUser);
 
 }

@@ -1,5 +1,7 @@
 package com.techelevator.tenmo.models;
 
+import java.util.List;
+
 public class Transfer {
 
 	private int transferId;
@@ -87,6 +89,17 @@ public class Transfer {
 	}
 	public void setTransferStatusId(int transferStatusId) {
 		this.transferStatusId = transferStatusId;
+	}
+	
+	public Transfer matchTransferObjectFromList(List<Transfer> transfers, int userChoice) {
+		Transfer selectedTransfer = new Transfer();
+		for(Transfer transfer : transfers) {
+			if(transfer.getTransferId() == userChoice) {
+				selectedTransfer = transfer;
+				break;
+			}
+		}
+		return selectedTransfer;
 	}
 	
 	

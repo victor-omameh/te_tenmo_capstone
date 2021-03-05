@@ -72,15 +72,44 @@ public class JdbcAccountUserIntegrationTest {
 		Assert.assertEquals("testname2", testResultUser.getUsername());
 	}
 	
+	@Test
+	public void test_withdraw() {
+		int userId = createTestUser("testname1");
+		AccountUser testAccountUser = new AccountUser();
+		testAccountUser.setUserId(userId);
+		testAccountUser.subtractAccountBalance(100);
+		
+		dao.updateAccountBalance(testAccountUser);
+		double result = dao.getAccountBalance("testname1");
+		
+		Assert.assertEquals(900, result, 0.0);
+	}
+	
+	@Test
+	public void test_add_money() {
+		int userId = createTestUser("testname1");
+		AccountUser testAccountUser = new AccountUser();
+		testAccountUser.setUserId(userId);
+		testAccountUser.addAccountBalance(100);
+		
+		
+		dao.updateAccountBalance(testAccountUser);
+		double result = dao.getAccountBalance("testname1");
+		
+		Assert.assertEquals(1100, result, 0.0);
+	}
 	
 	
-	private void createTestUser(String testName) {
+	
+	private int createTestUser(String testName) {
 		
 		String sql = "INSERT INTO users (user_id, username, password_hash) VALUES (DEFAULT, ? , ? ) RETURNING user_id";
 		
 		int userID = jdbcTemplate.queryForObject(sql, int.class, testName, "test1");
 		
 		createAccount(userID);
+		
+		return userID;
 		
 	}
 	

@@ -32,6 +32,25 @@ public class JdbcAccountUserDao implements AccountUserDao{
 	}
 
 	@Override
+	public List<AccountUser> getListOfAllUsers() {
+		String sql = "SELECT users.user_id, balance, username, account_id FROM accounts " + 
+				"JOIN users on users.user_id = accounts.user_id";
+		SqlRowSet rows = jdbcTemplate.queryForRowSet(sql);
+		
+		
+		List<AccountUser> listOfUsers = new ArrayList<AccountUser>();
+		
+		while(rows.next()) {
+			String storedUserName = rows.getString("username");
+			
+				AccountUser user = mapAccountUser(rows);
+				listOfUsers.add(user);
+		}
+		return listOfUsers;
+	}
+	
+	
+	@Override
 	public List<AccountUser> getListOfUsers(String username) {
 		String sql = "SELECT users.user_id, balance, username, account_id FROM accounts " + 
 				"JOIN users on users.user_id = accounts.user_id";
@@ -50,6 +69,36 @@ public class JdbcAccountUserDao implements AccountUserDao{
 		return listOfUsers;
 	}
 	
+
+	@Override
+	public AccountUser updateAccountBalance(AccountUser accountUser) {
+		
+		//get account ID's
+		String getAccountIdFrom = "SELECT account_id FROM accounts WHERE user_id = ?";
+		int accountIdFrom = jdbcTemplate.queryForObject(getAccountIdFrom, int.class, accountUser.getUserId());
+		
+		
+		
+		String sql = "UPDATE accounts SET balance = ? WHERE account_id = ? RETURNING balance";
+		jdbcTemplate.queryForRowSet(sql, accountUser.getAccountBalance(), accountIdFrom);
+
+		return accountUser;
+		
+	}
+/*
+	@Override
+	public AccountUser addMoney(AccountUser accountUser) {
+		
+		String getAccountIdTo = "SELECT account_id FROM accounts WHERE user_id = ?";
+		int accountIdTo = jdbcTemplate.queryForObject(getAccountIdTo, int.class,accountUser.getUserId());
+		
+		String sql = "UPDATE accounts SET balance = ? WHERE account_id = ? RETURNING balance";
+		jdbcTemplate.queryForRowSet(sql, accountUser.getAccountBalance(), accountIdTo);
+		
+		return accountUser;
+		
+	}
+	*/
 	
 	private AccountUser mapAccountUser(SqlRowSet rows) {
 		AccountUser accountUser = new AccountUser();
@@ -60,5 +109,6 @@ public class JdbcAccountUserDao implements AccountUserDao{
 		
 		return accountUser;
 	}
+
 
 }

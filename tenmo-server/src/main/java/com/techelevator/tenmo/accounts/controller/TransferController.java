@@ -27,6 +27,9 @@ public class TransferController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping (path = "/transfers", method = RequestMethod.POST)
 	public Transfer intiatingSendTransfer(@RequestBody Transfer transfer) {
+		if(transfer.getTransferTypeId() == 1) {
+		return dao.intiatingRequestTransfer(transfer.getUserFromId(), transfer.getUsernameTo(), transfer.getTransferAmount());
+		} else
 		return dao.intiatingSendTransfer(transfer.getUserToId(), transfer.getUsernameFrom(), transfer.getTransferAmount());
 	}
 	
