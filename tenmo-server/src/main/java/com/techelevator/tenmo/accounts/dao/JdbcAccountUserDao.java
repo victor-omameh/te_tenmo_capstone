@@ -12,9 +12,7 @@ import com.techelevator.tenmo.accounts.model.AccountUser;
 
 @Component
 public class JdbcAccountUserDao implements AccountUserDao{
-
-	
-	  
+  
 	private JdbcTemplate jdbcTemplate;
 	public JdbcAccountUserDao (JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
@@ -85,21 +83,7 @@ public class JdbcAccountUserDao implements AccountUserDao{
 		return accountUser;
 		
 	}
-/*
-	@Override
-	public AccountUser addMoney(AccountUser accountUser) {
-		
-		String getAccountIdTo = "SELECT account_id FROM accounts WHERE user_id = ?";
-		int accountIdTo = jdbcTemplate.queryForObject(getAccountIdTo, int.class,accountUser.getUserId());
-		
-		String sql = "UPDATE accounts SET balance = ? WHERE account_id = ? RETURNING balance";
-		jdbcTemplate.queryForRowSet(sql, accountUser.getAccountBalance(), accountIdTo);
-		
-		return accountUser;
-		
-	}
-	*/
-	
+
 	private AccountUser mapAccountUser(SqlRowSet rows) {
 		AccountUser accountUser = new AccountUser();
 		accountUser.setUserId(rows.getInt("user_id"));

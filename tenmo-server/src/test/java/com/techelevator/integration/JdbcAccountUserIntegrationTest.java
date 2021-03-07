@@ -77,6 +77,7 @@ public class JdbcAccountUserIntegrationTest {
 		int userId = createTestUser("testname1");
 		AccountUser testAccountUser = new AccountUser();
 		testAccountUser.setUserId(userId);
+		testAccountUser.setAccountBalance(dao.getAccountBalance("testname1"));
 		testAccountUser.subtractAccountBalance(100);
 		
 		dao.updateAccountBalance(testAccountUser);
@@ -90,6 +91,7 @@ public class JdbcAccountUserIntegrationTest {
 		int userId = createTestUser("testname1");
 		AccountUser testAccountUser = new AccountUser();
 		testAccountUser.setUserId(userId);
+		testAccountUser.setAccountBalance(dao.getAccountBalance("testname1"));
 		testAccountUser.addAccountBalance(100);
 		
 		

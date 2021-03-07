@@ -80,6 +80,13 @@ public class ConsoleService {
 		return result;
 	}
 	
+	
+	/*
+	 * 
+	 * DISPLAY METHODS
+	 * 
+	 */
+	
 	public void displayAccountBalance(double accountBalance) {
 		out.println("Your current account balance is: $" + df2.format(accountBalance));
 	}
@@ -113,38 +120,6 @@ public class ConsoleService {
 		return amount;
 	} 
 	
-	public void prompt(String prompt) {
-		out.println(prompt);
-	}
-	
-	public boolean validatingUserIdInput(List<AccountUser> userList, int userSelection) {
-		
-		boolean selectionValid = false;
-		for (AccountUser users : userList) {
-			if (users.getUserId() == userSelection) {
-				selectionValid = true;
-				break;
-			}
-		}
-		
-		return selectionValid;
-		
-	}
-	public boolean validatingTransferIdInput(List<Transfer> transferList, int userSelection) {
-		
-		boolean selectionValid = false;
-		for ( Transfer transfer: transferList) {
-			if (transfer.getTransferId() == userSelection) {
-				selectionValid = true;
-				break;
-			}
-		}
-		
-		return selectionValid;
-		
-	}
-	
-	
 	public void viewTransfers(List<Transfer> transfers, String currentUser) {
 		String lineFormat = "%-10s %-15s %-15s %n";
 		out.println("-----------------------------------------");
@@ -152,25 +127,20 @@ public class ConsoleService {
 		out.printf(lineFormat,"ID","From/To", "Amount");
 		out.println("-----------------------------------------");
 		
-		String user = "";
-		
+		String user = "";	
 		for(Transfer transfer : transfers) {
-			
-			String userNameFrom = transfer.getUsernameFrom();
-			String userNameTo = transfer.getUsernameTo();	
 			
 			if(!(transfer.getTransferStatusId() == 1)) {
 				if(transfer.getUsernameTo().equals(currentUser)) {
 					user = "From: " + transfer.getUsernameFrom();
 				} else if(!(transfer.getUsernameTo().equals(currentUser))) {
-					user = "To: " + transfer.getUsernameTo();
+					user = "To:   " + transfer.getUsernameTo();
 				}
 				out.printf(lineFormat, transfer.getTransferId(), user, "$"+ df2.format(transfer.getTransferAmount()));
 			}
 		}
 		out.println("----------");
-		
-	}
+		}
 	
 	public void viewTransferDetails(Transfer selectedTransfer) {
 		out.println("-----------------------------------------");
@@ -181,9 +151,9 @@ public class ConsoleService {
 		out.println("To: " + selectedTransfer.getUsernameTo());
 		out.println("Type: " + selectedTransfer.getTransferType());
 		out.println("Status: " + selectedTransfer.getTransferStatus());
-		out.println("Amount: $" + df2.format(selectedTransfer.getTransferAmount()));
-		
+		out.println("Amount: $" + df2.format(selectedTransfer.getTransferAmount()));	
 	}
+	
 	
 	public void viewPendingRequests(List<Transfer> transfers, String currentUser) {
 		
@@ -193,13 +163,7 @@ public class ConsoleService {
 		out.printf(lineFormat,"ID","To", "Amount");
 		out.println("-----------------------------------------");
 		
-		//String user = "";
-		
 		for(Transfer transfer : transfers) {
-			
-			
-			//String userNameTo = transfer.getUsernameTo();	
-			
 			if((transfer.getTransferStatusId() == 1)) {
 				if(!(transfer.getUsernameTo().equals(currentUser))) {
 					out.printf(lineFormat, transfer.getTransferId(), transfer.getUsernameTo(), "$"+ df2.format(transfer.getTransferAmount()));
@@ -207,8 +171,50 @@ public class ConsoleService {
 			}
 		}
 		out.println("----------");
-	
 	}
+	
+	public void approveOrRejectRequest() {
+		out.println("1: Approve");
+		out.println("2: Reject");
+		out.println("0: Don't approve or reject");
+		out.println("----------");
+	}
+	
+	public void prompt(String prompt) {
+		out.println();
+		out.println(prompt);
+	}
+	
+	
+	
+	/*
+	 * 
+	 * VALIDATION METHODS
+	 * 
+	 */
+	
+	public boolean validatingUserIdInput(List<AccountUser> userList, int userSelection) {
+		boolean selectionValid = false;
+		for (AccountUser users : userList) {
+			if (users.getUserId() == userSelection) {
+				selectionValid = true;
+				break;
+			}
+		}
+		return selectionValid;
+	}
+	
+	public boolean validatingTransferIdInput(List<Transfer> transferList, int userSelection) {
+		boolean selectionValid = false;
+		for ( Transfer transfer: transferList) {
+			if (transfer.getTransferId() == userSelection) {
+				selectionValid = true;
+				break;
+			}
+		}
+		return selectionValid;
+	}
+	
 	
 	public boolean validatingPendingTransferSelection (List<Transfer> listOfTransfers, int userSelection, int currentUserId) {
 		boolean validSelection = false;
@@ -223,15 +229,8 @@ public class ConsoleService {
 				}
 			}
 		}
-		
 		return validSelection;
 	}
 	
-	public void approveOrRejectRequest() {
-		out.println("1: Approve");
-		out.println("2: Reject");
-		out.println("0: Don't approve or reject");
-		out.println("----------");
-	}
 	
 }

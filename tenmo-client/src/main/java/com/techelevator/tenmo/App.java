@@ -35,7 +35,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     private AuthenticationService authenticationService;
     private AccountUserService accountUserService;
     private TransferService transferService;
-    private Transfer transfer;
+    //private Transfer transfer;
     
     private static DecimalFormat df2 = new DecimalFormat("#,##0.00");
 
@@ -55,9 +55,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		System.out.println("*********************");
 		
 		registerAndLogin();
-		accountUserService = new AccountUserService(API_BASE_URL, currentUser);
-		transferService = new TransferService(API_BASE_URL, currentUser);
-		transfer = new Transfer();
+		instantiateService();
 		mainMenu();
 	}
 
@@ -72,139 +70,82 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			} else if(MAIN_MENU_OPTION_VIEW_PENDING_REQUESTS.equals(choice)) {
 				pendingRequests();
 			} else if(MAIN_MENU_OPTION_SEND_BUCKS.equals(choice)) {
-				initiateSendTransfer(filterListOfUsers());
+				createSendTransfer(filterListOfUsers());
 			} else if(MAIN_MENU_OPTION_REQUEST_BUCKS.equals(choice)) {
 				initiateRequestTransfer(filterListOfUsers());
 			} else if(MAIN_MENU_OPTION_LOGIN.equals(choice)) {
 				login();
-				accountUserService = new AccountUserService(API_BASE_URL, currentUser);
-				transferService = new TransferService(API_BASE_URL, currentUser);
+				instantiateService();
 			} else {
 				exitProgram();
 			}
 		}
 	}
 	
-	private List<AccountUser> filterListOfUsers() {
-		
-		List<AccountUser> filteredListOfUsers = new ArrayList<AccountUser>();
-		List<AccountUser> listOfUsers = accountUserService.getListOfAllUsers();
-		
-		for(AccountUser accountUser : listOfUsers) {
-			if(!(accountUser.getUserId() == currentUser.getUser().getId())) {
-				filteredListOfUsers.add(accountUser);
-			}
-		}
-		return filteredListOfUsers;
-	}
+	/*
+	 * 
+	 * MAIN MENU METHODS
+	 * 
+	 */
 	
-	private AccountUser mappingUser (int userId) {
-		AccountUser selectedUser = new AccountUser();
-		List<AccountUser> users = accountUserService.getListOfAllUsers();
-		
-		for(AccountUser user : users) {
-			if(user.getUserId() == userId) {
-				selectedUser = user; 
-				break;
-			}
-		}	
-		return selectedUser;
-	}
-
-	
-	private void initiateSendTransfer (List<AccountUser> users ) {
-		Transfer sendTransfer = new Transfer();
-		int receivingUser = 0;
+	private void createSendTransfer (List<AccountUser> users ) {
+		int selectedUserID = 0;
 		double amountToTransfer = 0;
-		AccountUser loggedInUser = new AccountUser();
-		AccountUser receipient = new AccountUser();
-		
 		while(true) {
-			
 			while (true) {
 				console.displayListOfUsers(filterListOfUsers());
-				receivingUser = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel)");
-				if(receivingUser == 0) {
+				selectedUserID = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel)");
+				if(selectedUserID == 0) {
 					return;
 				}
-				if (!(console.validatingUserIdInput(filterListOfUsers(), receivingUser))) {
+				if (!(console.validatingUserIdInput(filterListOfUsers(), selectedUserID))) {
 					console.prompt("*** Invalid User *** Please select user ID from list");
 				} else {
 					break;
 				}
 			}
-			
 			amountToTransfer = console.getAmountToTransfer();
-			
 			if((accountUserService.getAccountBalance(currentUser.getUser().getUsername()) < amountToTransfer)) {
 				console.prompt("*** Insufficient Funds *** current balance is $" + df2.format(accountUserService.getAccountBalance(currentUser.getUser().getUsername())));
 			} else if (amountToTransfer <= 0){
 				console.prompt("*** Invalid Amount ***");	
 			} else {
-				sendTransfer.setUserToId(receivingUser);
-				sendTransfer.setUsernameFrom(currentUser.getUser().getUsername());
-				sendTransfer.setTransferAmount(amountToTransfer);
-				sendTransfer.setTransferTypeId(2);
-			
-				loggedInUser = mappingUser(currentUser.getUser().getId());
-				loggedInUser.subtractAccountBalance(amountToTransfer);
-				
-				receipient = mappingUser(receivingUser);
-				receipient.addAccountBalance(amountToTransfer);
-				
-				accountUserService.updateAccountBalance(loggedInUser);
-				accountUserService.updateAccountBalance(receipient);
-				
-				transferService.intiatingSendingTransfer(sendTransfer);
-				console.prompt("Transfer Complete [Status Approved] Transfer Amount: " + amountToTransfer);
-				console.prompt("Your current balance is: $" + df2.format(accountUserService.getAccountBalance(currentUser.getUser().getUsername())));
+				updateDatabaseForSend(selectedUserID, amountToTransfer);
 				break;
 			}
-
 		}
-		
 	}
 	
+
 	private void initiateRequestTransfer(List<AccountUser> users) {
-		Transfer requestTransfer = new Transfer();
-		int userSelection = 0;
+		int userSelectedID = 0;
 		double amountToTransfer = 0;
-		
 		while(true) {
 			while (true) {
 				console.displayListOfUsers(filterListOfUsers());
-				userSelection = console.getUserInputInteger("Enter ID of user you are requesting from (0 to cancel)");
-				if(userSelection == 0) {
+				userSelectedID = console.getUserInputInteger("Enter ID of user you are requesting from (0 to cancel)");
+				if(userSelectedID == 0) {
 					return;
 				}
-				if (!(console.validatingUserIdInput(filterListOfUsers(), userSelection))) {
+				if (!(console.validatingUserIdInput(filterListOfUsers(), userSelectedID))) {
 					console.prompt("*** Invalid User *** Please select user ID from list");
 				} else {
 					break;
 				}
 			}
 			amountToTransfer = console.getAmountToTransfer();
-			
 			if(amountToTransfer <= 0) {
 				console.prompt("*** Invalid Amount ***");	
 			} else {
-				requestTransfer.setUserFromId(userSelection);
-				requestTransfer.setUsernameTo(currentUser.getUser().getUsername());
-				requestTransfer.setTransferAmount(amountToTransfer);
-				requestTransfer.setTransferTypeId(1);
-				
-				transferService.intiatingRequestingTransfer(requestTransfer);
-				console.prompt("Transfer Request Complete [Status Pending] Transfer Amount: $" + df2.format(amountToTransfer));
+				updateDatabaseForRequestTransfer(userSelectedID, amountToTransfer);
 				break;
 			}
 		}
-		
 	}
 	
-	
 	private void viewTransferDetails () {
+		Transfer transfer = new Transfer();
 		int userSelection = 0;
-		
 		while(true) {
 			console.viewTransfers(transferService.getListOfTransfers(), currentUser.getUser().getUsername());
 			userSelection = console.getUserInputInteger("Please enter transfer ID to view details (0 to cancel)");
@@ -216,38 +157,40 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			} else {
 				break;	
 			}
-			
 		}
 		console.viewTransferDetails(transfer.matchTransferObjectFromList(transferService.getListOfTransfers(), userSelection));
 	}
 	
 	
 	private void pendingRequests() {
-		
-		int userSelection = 0;
+		int selectedTansferID = 0;
 		Transfer selectedTransfer = null;
 		while(true) {
-			
 			console.viewPendingRequests(transferService.getListOfTransfers(), currentUser.getUser().getUsername());
-			userSelection = console.getUserInputInteger("Please enter transfer ID to approve/reject (0 to cancel)");
-			if(userSelection == 0) {
+			selectedTansferID = console.getUserInputInteger("Please enter transfer ID to approve/reject (0 to cancel)");
+			if(selectedTansferID == 0) {
 				return;
 			}
-			if(!(console.validatingPendingTransferSelection(transferService.getListOfTransfers(), userSelection, currentUser.getUser().getId()))) {
+			if(!(console.validatingPendingTransferSelection(transferService.getListOfTransfers(), selectedTansferID, currentUser.getUser().getId()))) {
 				console.prompt("*** Invalid Transfer ID *** Please select Transfer ID from list");
 			} else {
-				selectedTransfer = returnSelectedRequest(userSelection);
-				userSelection = approveOrRejectRequest(selectedTransfer);
-				if (userSelection == 1 || userSelection ==2) {
+				selectedTransfer = returnSelectedRequest(selectedTansferID);
+				selectedTansferID = approveOrRejectRequest(selectedTransfer);
+				if (selectedTansferID == 1 || selectedTansferID ==2) {
 					
-					if (updateDatabaseForRequest(selectedTransfer, userSelection)) {
+					if (updateDatabaseForApprovedOrRejectedRequest(selectedTransfer, selectedTansferID)) {
 						break;
 					}
 				}
 			}
 		}
-	
 	}
+	
+	/* 
+	 * 
+	 * ADDITIONAL WORKER METHODS
+	 * 
+	 */
 	
 	private Transfer returnSelectedRequest(int userSelection) {
 		Transfer selectedPendingRequest = new Transfer();
@@ -257,7 +200,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				selectedPendingRequest = transfer;
 			}
 		}
-		
 		return selectedPendingRequest;
 	}
 	
@@ -279,18 +221,88 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		return userSelection;
 	}
 	
-	private boolean updateDatabaseForRequest(Transfer selectedTransfer, int userSelection) {
+	
+	private List<AccountUser> filterListOfUsers() {
+		
+		List<AccountUser> filteredListOfUsers = new ArrayList<AccountUser>();
+		List<AccountUser> listOfUsers = accountUserService.getListOfAllUsers();
+		
+		for(AccountUser accountUser : listOfUsers) {
+			if(!(accountUser.getUserId() == currentUser.getUser().getId())) {
+				filteredListOfUsers.add(accountUser);
+			}
+		}
+		return filteredListOfUsers;
+	}
+	
+	
+	private AccountUser mappingUser (int userId) {
+		AccountUser selectedUser = new AccountUser();
+		List<AccountUser> users = accountUserService.getListOfAllUsers();
+		
+		for(AccountUser user : users) {
+			if(user.getUserId() == userId) {
+				selectedUser = user; 
+				break;
+			}
+		}	
+		return selectedUser;
+	}
+	
+	/*
+	 * 
+	 * UPDATE DATABASE METHODS
+	 * 
+	 */
+	
+	
+	private void updateDatabaseForSend(int receivingUserID, double amountToTransfer) {
+		
+		Transfer sendTransfer = new Transfer();
+		
+		sendTransfer.setUserToId(receivingUserID);
+		sendTransfer.setUsernameFrom(currentUser.getUser().getUsername());
+		sendTransfer.setTransferAmount(amountToTransfer);
+		sendTransfer.setTransferTypeId(2);
+	
+		AccountUser loggedInUser = mappingUser(currentUser.getUser().getId());
+		loggedInUser.subtractAccountBalance(amountToTransfer);
+		
+		AccountUser recipient = mappingUser(receivingUserID);
+		recipient.addAccountBalance(amountToTransfer);
+		
+		accountUserService.updateAccountBalance(loggedInUser);
+		accountUserService.updateAccountBalance(recipient);
+		
+		transferService.intiatingSendingTransfer(sendTransfer);
+		console.prompt("Transfer Complete [Status Approved] Transfer Amount: " + amountToTransfer);
+		console.prompt("Your current balance is: $" + df2.format(accountUserService.getAccountBalance(currentUser.getUser().getUsername())));
+		
+	}
+	
+	private void updateDatabaseForRequestTransfer(int userSelectedID, double amountToTransfer) {
+		Transfer requestTransfer = new Transfer();
+		requestTransfer.setUserFromId(userSelectedID);
+		requestTransfer.setUsernameTo(currentUser.getUser().getUsername());
+		requestTransfer.setTransferAmount(amountToTransfer);
+		requestTransfer.setTransferTypeId(1);
+		
+		transferService.intiatingRequestingTransfer(requestTransfer);
+		console.prompt("Transfer Request Complete [Status Pending] Transfer Amount: $" + df2.format(amountToTransfer));
+		
+	}
+	
+	
+	private boolean updateDatabaseForApprovedOrRejectedRequest(Transfer selectedTransfer, int userSelection) {
 		
 		AccountUser loggedInUser = mappingUser(currentUser.getUser().getId());
 		AccountUser recipient = mappingUser(selectedTransfer.getUserToId());
 		
-		if (userSelection == 1) {
-			
+		if (userSelection == 1) {	
 			if((accountUserService.getAccountBalance(currentUser.getUser().getUsername()) < selectedTransfer.getTransferAmount())) {
 				console.prompt("*** Insufficient Funds *** current balance is $" + df2.format(accountUserService.getAccountBalance(currentUser.getUser().getUsername())));
 				return false;
-			} else {
-				
+			} else {	
 				selectedTransfer.setTransferStatusId(2);
 				transferService.updateTransferRequestStatus(selectedTransfer);
 				
@@ -300,25 +312,33 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				accountUserService.updateAccountBalance(loggedInUser);
 				accountUserService.updateAccountBalance(recipient);
 				
-				console.prompt("Transfer Complete");
-				console.prompt("You sent $" + df2.format(selectedTransfer.getTransferAmount()) + " to " + selectedTransfer.getUsernameTo());
-				console.prompt("Current Account Balance: $" + df2.format(accountUserService.getAccountBalance(currentUser.getUser().getUsername())));
-				 
-				return true;
-				
+				console.prompt("[Transfer Complete] \n" +
+						"You sent $" + df2.format(selectedTransfer.getTransferAmount()) + " to " + selectedTransfer.getUsernameTo() + "\n" +
+						"Current Account Balance: $" + df2.format(accountUserService.getAccountBalance(currentUser.getUser().getUsername())));	
+				return true;			
 			}
 		}
+		
 		if (userSelection == 2) {
 			selectedTransfer.setTransferStatusId(3);
 			transferService.updateTransferRequestStatus(selectedTransfer);
-			console.prompt("Request has been rejected");
-			
+			console.prompt("[Request has been rejected]");	
 			return true;
-		}
-		
+			}
 		return false;
 	}
 	
+	
+	/*
+	 * 
+	 * LOGIN METHODS
+	 * 
+	 */
+	
+	private void instantiateService() {
+		accountUserService = new AccountUserService(API_BASE_URL, currentUser);
+		transferService = new TransferService(API_BASE_URL, currentUser);
+	}
 	
 	private void exitProgram() {
 		System.exit(0);
